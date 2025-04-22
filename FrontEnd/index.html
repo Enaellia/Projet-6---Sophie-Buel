@@ -6,6 +6,7 @@
 	<title>Sophie Bluel - Architecte d'intérieur</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 	<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Work+Sans&display=swap"
 		rel="stylesheet">
@@ -20,7 +21,8 @@
 			<ul>
 				<li>projets</li>
 				<li>contact</li>
-				<li>login</li>
+				<li><a href="login.html" id="login-link">login</a></li>
+				<li><a href="#" id="logout-link" class="hidden">logout</a></li>
 				<li><img src="./assets/icons/instagram.png" alt="Instagram"></li>
 			</ul>
 		</nav>
@@ -42,15 +44,11 @@
 			</article>
 		</section>
 		<section id="portfolio">
-			<h2>Mes Projets</h2>
-			<ul>
-				<li>Tous</li>
-				<li>Objets</li>
-				<li>Appartements</li>
-				<li>Hotel & restaurants</li>
-			</ul>
-			<div class="gallery">
+			<div class="portfolio-header">
+				<h2>Mes Projets</h2>
 			</div>
+			<ul id="categories"></ul>
+			<div class="gallery"></div>
 		</section>
 		<section id="contact">
 			<h2>Contact</h2>
@@ -74,6 +72,48 @@
 			</ul>
 		</nav>
 	</footer>
+	<div id="modal" class="modal hidden">
+		<div class="modal-content">
+			<span class="close">&times;</span>
+
+			<!-- 🖼️ VUE GALERIE PHOTO -->
+			<div class="modal-gallery-view">
+				<h3>Galerie photo</h3>
+				<div class="modal-gallery">
+					<!-- Projets ajoutés dynamiquement ici -->
+				</div>
+				<div class="modal-buttons">
+					<button class="add-photo-btn">Ajouter une photo</button>
+				</div>
+			</div>
+
+			<!-- VUE AJOUT PHOTO -->
+			<div class="modal-add-photo hidden">
+				<span class="back-arrow"><i class="fa-solid fa-arrow-left"></i></span>
+				<h3>Ajout photo</h3>
+
+				<form id="photo-form" enctype="multipart/form-data">
+					<div class="upload-area">
+						<label for="image-upload" class="upload-label">
+							<i class="fa-regular fa-image"></i><br>
+							<h4>+ Ajouter photo</h4>
+							<input type="file" id="image-upload" name="image" accept="image/png, image/jpeg" hidden>
+						</label>	
+					<p class="upload-info">jpg, png : 4mo max</p>
+				</div>
+					<div id="image-preview"></div>
+					<h5 class="form-label">Titre</h5>
+					<input type="text" id="title" name="title" placeholder="Titre" required>
+					<h5 class="form-label">Catégorie</h5>
+					<select id="category" name="category" required>
+						<option value="">-- Choisir une catégorie --</option>
+					</select>
+					<button type="submit" class="submit-btn" disabled>Valider</button>
+				</form>
+			</div>
+		</div>
+	</div>
+
 	<script src="./script.js"></script>
 </body>
 
