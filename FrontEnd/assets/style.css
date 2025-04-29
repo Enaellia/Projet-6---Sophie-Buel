@@ -539,10 +539,16 @@ footer nav ul {
 	border-radius: 4px;
 }
 
+.upload-area.has-preview .upload-label,
+.upload-area.has-preview .upload-info {
+  display: none;
+}
+
 #image-preview img {
 	max-width: 100%;
-	height: auto;
-	margin-top: 10px;
+	max-height: 170px;
+	object-fit: cover;
+	border-radius: 5px;
 }
 
 #photo-form input,
@@ -555,14 +561,16 @@ footer nav ul {
 }
 
 .submit-btn {
-	background-color: #1D6154;
-	color: white;
-	border: none;
-	border-radius: 20px;
-	padding: 10px;
-	font-size: 16px;
-	cursor: pointer;
-	margin-top: 20px;
+	display: block;
+    margin: 30px auto 0 auto;
+    background-color: #1D6154;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    font-family: 'Syne';
+    padding: 10px 90px;
+    font-size: 16px;
+    cursor: pointer;
 }
 
 .submit-btn:disabled {
@@ -573,3 +581,10 @@ footer nav ul {
 .hidden {
 	display: none !important;
 }
+
+.line {
+	border: none;
+    border-top: 1px solid #b3b3b3;
+    margin: 50px 0 0 0;
+    width: 100%;
+  }

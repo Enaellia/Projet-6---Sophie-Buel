@@ -47,7 +47,6 @@ function loadCategories() {
       const categoriesList = document.getElementById("categories");
       categoriesList.innerHTML = '';
 
-      // Bouton "Tous"
       const allLi = document.createElement("li");
       allLi.textContent = "Tous";
       allLi.classList.add("active");
@@ -57,7 +56,6 @@ function loadCategories() {
       });
       categoriesList.appendChild(allLi);
 
-      // Boutons dynamiques pour chaque catégorie
       categories.forEach(categorie => {
         const li = document.createElement("li");
         li.textContent = categorie.name;
@@ -96,6 +94,30 @@ function displayModalGallery(works) {
     const deleteBtn = document.createElement("span");
     deleteBtn.innerHTML = '<i class="fa-solid fa-trash-can"></i>';
     deleteBtn.classList.add("delete-icon");
+    deleteBtn.addEventListener('click', () => {
+      const confirmDelete = confirm("Es-tu sûr de vouloir supprimer ce projet ?");
+      if (!confirmDelete) return;
+    
+      fetch("http://localhost:5678/api/works/" + work.id, {
+        method: "DELETE",
+        headers: {
+          Authorization: "Bearer " + localStorage.getItem("token"),
+          "Content-Type": "application/json"
+        }
+      })
+      .then(response => {
+        if (response.ok) {
+          figure.remove();
+        } else {
+          alert("Erreur lors de la suppression du projet !");
+          console.error("Erreur DELETE :", response.statusText);
+        }
+      })
+      .catch(error => {
+        alert("Impossible de supprimer le projet (problème réseau ou serveur)");
+        console.error("Erreur réseau :", error);
+      });
+    });
 
     figure.appendChild(img);
     figure.appendChild(deleteBtn);
@@ -109,8 +131,19 @@ function openModal() {
   if (modal) {
     modal.classList.remove("hidden");
     displayModalGallery(allWorks);
+
+    // Vue galerie par défaut
     modalGalleryView.classList.remove("hidden");
     modalAddPhotoView.classList.add("hidden");
+
+    // Réinitialiser le formulaire
+    if (form) form.reset();
+    if (previewContainer) previewContainer.innerHTML = "";
+    if (submitBtn) submitBtn.disabled = true;
+    uploadArea?.classList.remove("has-preview");
+
+    // Recharger les catégories dans le formulaire
+    loadCategoriesInForm();
   }
 }
 
@@ -141,16 +174,28 @@ function loadCategoriesInForm() {
 document.addEventListener("DOMContentLoaded", () => {
   loadWorks().then(loadCategories);
 
-  // Gestion login/logout
   const token = localStorage.getItem("token");
   const loginLink = document.getElementById("login-link");
   const logoutLink = document.getElementById("logout-link");
+
+  const modal = document.getElementById("modal");
+  const form = document.getElementById("photo-form");
+  const imageInput = document.getElementById("image-upload");
+  const titleInput = document.getElementById("title");
+  const categorySelect = document.getElementById("category");
+  const submitBtn = document.querySelector(".submit-btn");
+  const previewContainer = document.getElementById("image-preview");
+
+  const modalGalleryView = document.querySelector(".modal-gallery-view");
+  const modalAddPhotoView = document.querySelector(".modal-add-photo");
+  const addPhotoBtn = document.querySelector(".add-photo-btn");
+  const backArrow = document.querySelector(".back-arrow");
+  const uploadArea = document.querySelector(".upload-area");
 
   if (token) {
     if (loginLink) loginLink.classList.add("hidden");
     if (logoutLink) logoutLink.classList.remove("hidden");
 
-    // Ajout bouton "Modifier" dans le header si connecté
     const headerContainer = document.querySelector(".portfolio-header");
     if (headerContainer) {
       const editBtn = document.createElement("button");
@@ -172,36 +217,105 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Gestion fermeture modale
   const closeBtn = document.querySelector(".modal .close");
   if (closeBtn) {
     closeBtn.addEventListener("click", closeModal);
   }
 
-  // ==== Gestion ajout de photo dans la modale ====
-  const form = document.getElementById("photo-form");
-  const previewContainer = document.getElementById("image-preview");
-  const submitBtn = document.querySelector(".submit-btn");
+  modal.addEventListener("click", function (event) {
+    if (event.target === modal) {
+      closeModal();
+    }
+  });
 
-  const modalGalleryView = document.querySelector(".modal-gallery-view");
-  const modalAddPhotoView = document.querySelector(".modal-add-photo");
-  const addPhotoBtn = document.querySelector(".add-photo-btn");
-  const backArrow = document.querySelector(".back-arrow");
-
-  addPhotoBtn?.addEventListener("click", () => {
+  addPhotoBtn.addEventListener("click", () => {
     modalGalleryView.classList.add("hidden");
     modalAddPhotoView.classList.remove("hidden");
-
-    // Nettoyage du formulaire
     if (form) form.reset();
     if (previewContainer) previewContainer.innerHTML = "";
     if (submitBtn) submitBtn.disabled = true;
-
+    uploadArea?.classList.remove("has-preview");
     loadCategoriesInForm();
   });
 
-  backArrow?.addEventListener("click", () => {
+  backArrow.addEventListener("click", () => {
     modalAddPhotoView.classList.add("hidden");
     modalGalleryView.classList.remove("hidden");
+  });
+
+  // Prévisualisation d'image avec masquage de la zone d'upload
+  imageInput.addEventListener("change", function () {
+    previewContainer.innerHTML = "";
+    const file = imageInput.files[0];
+
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        const img = document.createElement("img");
+        img.src = e.target.result;
+        img.alt = "Prévisualisation";
+        img.style.maxWidth = "100%";
+        img.style.maxHeight = "170px";
+        img.style.borderRadius = "5px";
+        previewContainer.appendChild(img);
+        uploadArea?.classList.add("has-preview");
+      };
+      reader.readAsDataURL(file);
+    } else {
+      uploadArea?.classList.remove("has-preview");
+    }
+
+    checkFormValidity();
+  });
+
+  // Validation dynamique du formulaire
+  function checkFormValidity() {
+    const hasImage = imageInput.files.length > 0;
+    const hasTitle = titleInput.value.trim().length > 0;
+    const hasCategory = categorySelect.value !== "";
+
+    submitBtn.disabled = !(hasImage && hasTitle && hasCategory);
+  }
+
+  titleInput.addEventListener("input", checkFormValidity);
+  categorySelect.addEventListener("change", checkFormValidity);
+
+  form.addEventListener("submit", function(event) {
+    event.preventDefault();
+    const imageFile = imageInput.files[0];
+    const title = titleInput.value.trim();
+    const category = categorySelect.value;
+
+    if (!imageFile || !title || !category) {
+      alert("Merci de remplir tous les champs !");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("image", imageFile);
+    formData.append("title", title);
+    formData.append("category", category);
+
+    fetch("http://localhost:5678/api/works", {
+      method: "POST",
+      headers: {
+        Authorization: "Bearer " + localStorage.getItem("token"),
+      },
+      body: formData
+    })
+    .then(response => {
+      if (response.ok) {
+        alert("Projet ajouté avec succès !");
+        closeModal();
+        loadWorks();
+      } else {
+        alert("Erreur lors de l'ajout du projet !");
+        console.error("Erreur ajout :", response.statusText);
+      }
+    })
+    .catch(error => {
+      alert("Erreur réseau lors de l'ajout !");
+      console.error("Erreur réseau :", error);
+    });
   });
 });
