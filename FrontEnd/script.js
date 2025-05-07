@@ -4,9 +4,9 @@ console.log("Script chargé");
 // ==== Données globales ====
 let allWorks = [];
 
-// ==== Fonctions API ====
+// ==== charger les projets ====
 function loadWorks() {
-  return fetch("http://localhost:5678/api/works")
+  fetch("http://localhost:5678/api/works")
     .then(response => response.json())
     .then(works => {
       allWorks = works;
@@ -17,6 +17,7 @@ function loadWorks() {
     });
 }
 
+// ==== Afficher les projets dans la galerie principale ====
 function displayWorks(works) {
   const gallery = document.querySelector(".gallery");
   gallery.innerHTML = '';
@@ -33,6 +34,7 @@ function displayWorks(works) {
   });
 }
 
+// ==== Charger les catégories pour les filtres ====
 function loadCategories() {
   fetch("http://localhost:5678/api/categories")
     .then(response => response.json())
@@ -61,15 +63,17 @@ function loadCategories() {
     });
 }
 
+// ==== Mettre à jour la catégorie active sélectionnée ====
 function updateActiveCategory(selectedLi) {
   const allLis = document.querySelectorAll("#categories li");
   allLis.forEach(li => li.classList.remove("active"));
   selectedLi.classList.add("active");
 }
 
-// ==== Initialisation DOM ====
+// ==== DOM chargé ====
 document.addEventListener("DOMContentLoaded", () => {
-  loadWorks().then(loadCategories);
+  loadWorks();
+  loadCategories();
 
   const modal = document.getElementById("modal");
   const form = document.getElementById("photo-form");
@@ -86,6 +90,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const backArrow = document.querySelector(".back-arrow");
   const closeBtn = document.querySelector(".modal .close");
 
+  // ==== Réinitialiser le formulaire d'ajout ====
   function resetModalForm() {
     if (form) form.reset();
     if (previewContainer) previewContainer.innerHTML = "";
@@ -93,11 +98,13 @@ document.addEventListener("DOMContentLoaded", () => {
     uploadArea?.classList.remove("has-preview");
   }
 
+  // ==== Revenir à la vue galerie dans la modale ====
   function resetModalView() {
     modalGalleryView.classList.remove("hidden");
     modalAddPhotoView.classList.add("hidden");
   }
 
+  // ====  Ouvrir la modale ====
   function openModal() {
     modal.classList.remove("hidden");
     displayModalGallery(allWorks);
@@ -106,55 +113,64 @@ document.addEventListener("DOMContentLoaded", () => {
     loadCategoriesInForm();
   }
 
+  // ==== Fermer la modale ====
   function closeModal() {
     modal.classList.add("hidden");
     resetModalForm();
     resetModalView();
   }
 
-  const token = localStorage.getItem("token");
-  const loginLink = document.getElementById("login-link");
-  const logoutLink = document.getElementById("logout-link");
+  // ==== GESTION DE SESSION (login/logout) ====
+const token = localStorage.getItem("token");
+const loginLink = document.getElementById("login-link");
+const logoutLink = document.getElementById("logout-link");
 
-  if (token) {
-    if (loginLink) loginLink.classList.add("hidden");
-    if (logoutLink) logoutLink.classList.remove("hidden");
+// Vérifie si le token est bien défini et non vide
+if (token && token !== "") {
+  // Cacher le lien "login" / Afficher "logout"
+  if (loginLink) loginLink.classList.add("hidden");
+  if (logoutLink) logoutLink.classList.remove("hidden");
 
-    const headerContainer = document.querySelector(".portfolio-header");
-    if (headerContainer) {
-      const editBtn = document.createElement("button");
-      editBtn.classList.add("edit-btn");
-      const icon = document.createElement("i");
-      icon.classList.add("fa-regular", "fa-pen-to-square");
-      editBtn.appendChild(icon);
-      editBtn.appendChild(document.createTextNode(" Modifier"));
-      editBtn.addEventListener("click", openModal);
-      headerContainer.appendChild(editBtn);
-    }
+  // === Affichage de la bannière "Mode édition" ===
+  const editBanner = document.createElement("div");
+  editBanner.classList.add("edit-banner");
+  editBanner.innerHTML = '<i class="fa-regular fa-pen-to-square"></i><span>Mode édition</span>';
+  document.body.prepend(editBanner);
+  document.body.classList.add("with-edit-banner");
 
-    logoutLink?.addEventListener("click", (e) => {
-      e.preventDefault();
-      localStorage.removeItem("token");
-      window.location.reload();
-    });
+  // === Ajout du bouton "Modifier" dans le header ===
+  const headerContainer = document.querySelector(".portfolio-header");
+  if (headerContainer) {
+    const editBtn = document.createElement("button");
+    editBtn.classList.add("edit-btn");
+
+    const icon = document.createElement("i");
+    icon.classList.add("fa-regular", "fa-pen-to-square");
+
+    editBtn.appendChild(icon);
+    editBtn.appendChild(document.createTextNode(" Modifier"));
+    editBtn.addEventListener("click", openModal);
+    headerContainer.appendChild(editBtn);
   }
 
-  closeBtn?.addEventListener("click", () => {
-    closeModal();
+  // === Gestion du logout ===
+  logoutLink?.addEventListener("click", (e) => {
+    e.preventDefault();
+    localStorage.removeItem("token");
+    window.location.reload();
   });
+}
 
-  modal.addEventListener("click", function (event) {
-    if (event.target === modal) {
-      closeModal();
-    }
-  });
-
+  // ==== FERMETURE DE LA MODALE ====
+  closeBtn?.addEventListener("click", () => closeModal());
+  modal.addEventListener("click", (e) => { if (e.target === modal) closeModal(); });
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape" && !modal.classList.contains("hidden")) {
       closeModal();
     }
   });
 
+  // ==== GESTION DE "Ajouter une photo" ====
   addPhotoBtn.addEventListener("click", () => {
     modalGalleryView.classList.add("hidden");
     modalAddPhotoView.classList.remove("hidden");
@@ -167,6 +183,7 @@ document.addEventListener("DOMContentLoaded", () => {
     modalGalleryView.classList.remove("hidden");
   });
 
+  // ==== GESTION DU CHOIX D'IMAGE ====
   imageInput.addEventListener("change", function () {
     previewContainer.innerHTML = "";
     const file = imageInput.files[0];
@@ -189,6 +206,7 @@ document.addEventListener("DOMContentLoaded", () => {
     checkFormValidity();
   });
 
+  // ==== Vérifier que tous les champs sont valides ====
   function checkFormValidity() {
     const hasImage = imageInput.files.length > 0;
     const hasTitle = titleInput.value.trim().length > 0;
@@ -199,7 +217,8 @@ document.addEventListener("DOMContentLoaded", () => {
   titleInput.addEventListener("input", checkFormValidity);
   categorySelect.addEventListener("change", checkFormValidity);
 
-  form.addEventListener("submit", function(event) {
+  // ==== Soumettre un nouveau projet ====
+  form.addEventListener("submit", function (event) {
     event.preventDefault();
     const imageFile = imageInput.files[0];
     const title = titleInput.value.trim();
@@ -219,23 +238,24 @@ document.addEventListener("DOMContentLoaded", () => {
       },
       body: formData
     })
-    .then(response => {
-      if (response.ok) {
-        alert("Projet ajouté avec succès !");
-        closeModal();
-        loadWorks();
-      } else {
-        alert("Erreur lors de l'ajout du projet !");
-        console.error("Erreur ajout :", response.statusText);
-      }
-    })
-    .catch(error => {
-      alert("Erreur réseau lors de l'ajout !");
-      console.error("Erreur réseau :", error);
-    });
+      .then(response => {
+        if (response.ok) {
+          alert("Projet ajouté avec succès !");
+          closeModal();
+          loadWorks();
+        } else {
+          alert("Erreur lors de l'ajout du projet !");
+          console.error("Erreur ajout :", response.statusText);
+        }
+      })
+      .catch(error => {
+        alert("Erreur réseau lors de l'ajout !");
+        console.error("Erreur réseau :", error);
+      });
   });
 });
 
+// ==== Charger les catégories dans le formulaire ====
 function loadCategoriesInForm() {
   fetch("http://localhost:5678/api/categories")
     .then(res => res.json())
@@ -251,6 +271,7 @@ function loadCategoriesInForm() {
     });
 }
 
+// ==== Afficher les projets dans la modale ====
 function displayModalGallery(works) {
   const modalGallery = document.querySelector(".modal-gallery");
   modalGallery.innerHTML = '';
@@ -272,18 +293,19 @@ function displayModalGallery(works) {
           "Content-Type": "application/json"
         }
       })
-      .then(response => {
-        if (response.ok) {
-          figure.remove();
-        } else {
-          alert("Erreur lors de la suppression du projet !");
-          console.error("Erreur DELETE :", response.statusText);
-        }
-      })
-      .catch(error => {
-        alert("Impossible de supprimer le projet (problème réseau ou serveur)");
-        console.error("Erreur réseau :", error);
-      });
+        .then(response => {
+          if (response.ok) {
+            figure.remove();
+            loadWorks();
+          } else {
+            alert("Erreur lors de la suppression du projet !");
+            console.error("Erreur DELETE :", response.statusText);
+          }
+        })
+        .catch(error => {
+          alert("Impossible de supprimer le projet (problème réseau ou serveur)");
+          console.error("Erreur réseau :", error);
+        });
     });
     figure.appendChild(img);
     figure.appendChild(deleteBtn);

@@ -339,9 +339,17 @@ footer nav ul {
 	max-width: 400px;
 	margin: 100px auto;
 	padding: 40px;
-	border: 1px solid #ddd;
 	border-radius: 10px;
-	background-color: #f9f9f9;
+}
+
+.login-container h2 {
+	display: flex;
+    justify-content: center;
+    margin-bottom: 40px;
+}
+
+.login-container h3 {
+	font-weight: 500;
 }
 
 #login-form {
@@ -350,10 +358,32 @@ footer nav ul {
 	gap: 15px;
 }
 
-#login-form input,
+#login-form input {
+	height: 50px;
+    font-size: 1.2em;
+    border: none;
+    box-shadow: 0px 4px 14px rgba(0, 0, 0, 0.09);
+	margin-bottom: 10px;
+}
+
 #login-form button {
 	padding: 10px;
 	font-size: 16px;
+	font-family: 'Syne';
+    font-weight: 700;
+    color: white;
+    background-color: #1D6154;
+    margin: 2em auto;
+    width: 180px;
+    text-align: center;
+    border-radius: 60px;
+}
+
+#login-form p {
+	display: flex;
+	justify-content: center;
+	font-weight: 500;
+	text-decoration: underline;
 }
 
 .portfolio-header {
@@ -541,7 +571,7 @@ footer nav ul {
 
 .upload-area.has-preview .upload-label,
 .upload-area.has-preview .upload-info {
-  display: none;
+	display: none;
 }
 
 #image-preview img {
@@ -554,23 +584,23 @@ footer nav ul {
 #photo-form input,
 #photo-form select {
 	width: 100%;
-    height: 70px;
-    font-size: 1.2em;
-    border: none;
-    box-shadow: 0px 4px 14px rgba(0, 0, 0, 0.09);
+	height: 70px;
+	font-size: 1.2em;
+	border: none;
+	box-shadow: 0px 4px 14px rgba(0, 0, 0, 0.09);
 }
 
 .submit-btn {
 	display: block;
-    margin: 30px auto 0 auto;
-    background-color: #1D6154;
-    color: white;
-    border: none;
-    border-radius: 20px;
-    font-family: 'Syne';
-    padding: 10px 90px;
-    font-size: 16px;
-    cursor: pointer;
+	margin: 30px auto 0 auto;
+	background-color: #1D6154;
+	color: white;
+	border: none;
+	border-radius: 20px;
+	font-family: 'Syne';
+	padding: 10px 90px;
+	font-size: 16px;
+	cursor: pointer;
 }
 
 .submit-btn:disabled {
@@ -584,7 +614,30 @@ footer nav ul {
 
 .line {
 	border: none;
-    border-top: 1px solid #b3b3b3;
-    margin: 50px 0 0 0;
-    width: 100%;
-  }
+	border-top: 1px solid #b3b3b3;
+	margin: 50px 0 0 0;
+	width: 100%;
+}
+
+.edit-banner {
+	background-color: black;
+	color: white;
+	padding: 15px 0;
+	text-align: center;
+	font-family: 'Work Sans', sans-serif;
+	font-size: 14px;
+	position: fixed;
+	top: 0;
+	width: 100%;
+	left: 0px;
+	z-index: 1000;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	gap: 10px;
+}
+
+body.with-edit-banner {
+	padding-top: 50px;
+	/* Pour ne pas que le contenu passe dessous */
+}
